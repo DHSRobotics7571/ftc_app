@@ -1,0 +1,3 @@
+/*
+[insert the manual mode]
+*/
