@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@TeleOp(name="Autonomous - RED", group="Autonomous")
+@TeleOp(name="HardwareTest", group="Autonomous")
 public class hardwareTest extends OpMode implements SensorEventListener {
     //instantiate objects
     private DcMotor motorRightFront,motorRightBack,motorLeftFront,motorLeftBack;
