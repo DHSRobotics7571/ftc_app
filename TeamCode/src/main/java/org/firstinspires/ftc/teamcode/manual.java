@@ -2,12 +2,21 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 @TeleOp(name="Manual", group="Manual")
 public class manual extends OpMode {
     //instantiate objects
     private DcMotor motorRightFront,motorRightBack,motorLeftFront,motorLeftBack;
+    private DcMotor motorLinearRight,motorLinearLeft;
+    private DcMotor motorFeeder;
+    private DcMotor motorCatapult;
+
+    private CRServo servoBeacon;
+
+    //logic objects
+    double power;
     @Override
     public void init(){
         motorRightFront = hardwareMap.dcMotor.get("rightfront");
@@ -16,6 +25,15 @@ public class manual extends OpMode {
         motorLeftBack = hardwareMap.dcMotor.get("leftback");
         motorLeftFront.setDirection(DcMotorSimple.Direction.REVERSE);
         motorLeftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        motorLinearRight = hardwareMap.dcMotor.get("linearr");
+        motorLinearLeft = hardwareMap.dcMotor.get("linearl");
+
+        motorFeeder = hardwareMap.dcMotor.get("feeder");
+
+        motorCatapult = hardwareMap.dcMotor.get("catapult");
+
+        servoBeacon = hardwareMap.crservo.get("beacon");
     }
     @Override
     public void loop(){
@@ -27,21 +45,25 @@ public class manual extends OpMode {
             left                                    left
             right                                   right
         LEFT_STICK                              LEFT_STICK
-            up          -drive motor                up
-            down        -drive motor                down
-            left        -drive motor                left
-            right       -drive motor                right
+            up                  -drive motor        up                  -ballfeed
+            down                -drive motor        down                -ballfeed
+            left                -drive motor        left
+            right               -drive motor        right
         RIGHT_STICK                             RIGHT_STICK
-            up                                      up
-            down                                    down
-            left        -drive motor                left
-            right       -drive motor                right
+            up                                      up                  -catapult
+            down                                    down                -catapult
+            left                -drive motor        left
+            right               -drive motor        right
         BUTTONS                                 BUTTONS
             a                                       a
             x                                       x
             b                                       b
             y                                       y
-
+        BUMPERS                                 BUMPERS
+            left_trigger                            left_trigger        -linear motor
+            left_bumper         -beacon             left_bumper
+            right_trigger                           right_trigger       -linear motor
+            right_bumper        -beacon             right_bumper
 
          */
 
@@ -64,9 +86,17 @@ public class manual extends OpMode {
         motorLeftFront.setPower(motorVals[2]);
         motorLeftBack.setPower(motorVals[3]);
 
+        motorLinearLeft.setPower(gamepad2.left_trigger - gamepad2.right_trigger);
+        motorLinearRight.setPower(gamepad2.left_trigger - gamepad2.right_trigger);
 
-
-
+        motorFeeder.setPower(gamepad2.left_stick_y);
+        motorCatapult.setPower(gamepad2.right_stick_y);
+        //set servo positions/power
+        power = 0;
+        if(gamepad1.right_bumper){
+            power = 1;
+        }else if(gamepad1.left_bumper) power = -1;
+        servoBeacon.setPower(power);
     }
     @Override
     public void stop(){
