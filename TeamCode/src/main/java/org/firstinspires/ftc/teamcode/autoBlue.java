@@ -14,6 +14,7 @@ public class autoBlue extends OpMode {
         motorRightBack = hardwareMap.dcMotor.get("rightback");
         motorLeftFront = hardwareMap.dcMotor.get("leftfront");
         motorLeftBack = hardwareMap.dcMotor.get("leftback");
+        //hi fam
     }
     @Override
     public void loop(){
