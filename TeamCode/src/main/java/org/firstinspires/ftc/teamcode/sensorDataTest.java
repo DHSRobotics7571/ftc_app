@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 
-@TeleOp(name="Manual", group="Manual")
+@TeleOp(name="Sensor Data Test", group="Manual")
 public class sensorDataTest extends manual {
     //logic objects
     double power;

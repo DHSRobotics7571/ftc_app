@@ -25,6 +25,7 @@ public class hardwareTest extends OpMode implements SensorEventListener {
         motorLeftFront = hardwareMap.dcMotor.get("leftfront");
         motorLeftBack = hardwareMap.dcMotor.get("leftback");
     }
+
     @Override
     public void loop(){
         //Mecanum wheel drive - Vector Addition and subtraction
