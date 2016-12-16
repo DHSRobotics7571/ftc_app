@@ -20,6 +20,7 @@ public class autoRed extends OpMode {
     private double thresholdmax = 0.1;
     //the farthest away the robot can be to the vision target
     private double thresholdmin = 0.1;
+    private long time;
     @Override
     public void init(){
         motorRightFront = hardwareMap.dcMotor.get("rightfront");
@@ -46,32 +47,37 @@ public class autoRed extends OpMode {
                 }
                 break;
             case 2:
+                //squared up, go forward past the beacon.
                 setThrottle(.1);
-                startMotors();
                 robostate++;
                 break;
             case 3:
-                if (ODSleft.getRawLightDetected > 0.001){
-                    robostate = 5;
-                    break;
-                    }
-                        else{
-                            setThrottle(-.1);
-                            robostate++;
-                        break;
-                    }
+
+                if (ODSleft.getRawLightDetected() > 0.001){
+                    //not passed the beacon
                 }
+                else{
+                    //passed the beacon, start going backwards
+                    setThrottle(-.1);
+                    robostate++;
+
+                }
+                break;
+
             case 4:
-                if (ODSleft.getRawLightDetected > 0.001) {
-                    robostate = 5;
-                    break;
-                }
-            case 5:
-                setThrottle(.05);
-                startMotors();
-                if (color > 9 && color < 11)
+                //check the color sensor input, if its within the threshold, stop and push it.
+                if (color.red() > 9 && color.red() < 11){
                     stopMotors();
                     push();
+                    robostate++;
+                }
+                break;
+            case 5:
+                if(push()){
+                    //done pushing (beacon pusher is also retracted.
+                    //onto the second beacon
+
+                }
             default:
                 break;
         }
@@ -79,9 +85,14 @@ public class autoRed extends OpMode {
     }
     @Override
     public void stop(){
-
+        beaconpusher.setPower(1);
     }
+    public boolean push(){
+        if(time == 0){
 
+        }
+        return false;
+    }
     //square robot with the wall to push the beacons
     public boolean squareUp(){
         //initial check to see if close to vision target
