@@ -44,12 +44,32 @@ public class autoRed extends OpMode {
                 }
                 break;
             case 2:
-                /*
-                    You are squared up with the beacon.
-                    What will you do?
-                    You have a servo beacon pusher, and a color sensor.
-                 */
+                setThrottle(.1);
+                startMotors();
+                robostate++;
                 break;
+            case 3:
+                if (ODSleft.getRawLightDetected > 0.001){
+                    robostate = 5;
+                    break;
+                    }
+                        else{
+                            setThrottle(-.1);
+                            robostate++;
+                        break;
+                    }
+                }
+            case 4:
+                if (ODSleft.getRawLightDetected > 0.001) {
+                    robostate = 5;
+                    break;
+                }
+            case 5:
+                setThrottle(.05);
+                startMotors();
+                if (color > 9 && color < 11)
+                    stopMotors();
+                    push();
             default:
                 break;
         }
