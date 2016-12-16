@@ -74,7 +74,7 @@ public class autoRed extends OpMode {
                 break;
             case 5:
                 if(push()){
-                    //done pushing (beacon pusher is also retracted.
+                    //done pushing (beacon pusher is also retracted).
                     //onto the second beacon
 
                 }
@@ -85,11 +85,21 @@ public class autoRed extends OpMode {
     }
     @Override
     public void stop(){
-        beaconpusher.setPower(1);
+
     }
     public boolean push(){
         if(time == 0){
-
+            time = System.currentTimeMillis();
+            beaconpusher.setPower(1);
+        }
+        else{
+            if(System.currentTimeMillis()-time>=4000){
+                beaconpusher.setPower(-1);
+            }
+            if(System.currentTimeMillis()-time>=8000){
+                beaconpusher.setPower(0);
+                return true;
+            }
         }
         return false;
     }
