@@ -80,8 +80,13 @@ public class autoRed extends OpMode {
                 if (ticks > 5600) {
                     //i.e. 5 rotations(just an estimate)
                     setThrottle(-.25);
-                    if (ODSleft.getRawLightDetected > 0.001)
+                    if (ODSleft.getRawLightDetected > 0.001) {
+                        squareUp();
+                        robostate++;
+                    }
                 }
+            case 7:
+                
 
             default:
                 break;
