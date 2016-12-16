@@ -3,17 +3,24 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
+
 @TeleOp(name="Manual", group="Manual")
 public class manual extends OpMode {
     //instantiate objects
-    private DcMotor motorRightFront,motorRightBack,motorLeftFront,motorLeftBack;
-    private DcMotor motorLinearRight,motorLinearLeft;
-    private DcMotor motorFeeder;
-    private DcMotor motorCatapult;
+    DcMotor motorRightFront,motorRightBack,motorLeftFront,motorLeftBack;
+    DcMotor motorLinearRight,motorLinearLeft;
+    DcMotor motorFeeder;
+    DcMotor motorCatapult;
 
-    private CRServo servoBeacon;
+    CRServo servoBeacon;
+
+    OpticalDistanceSensor ODSright, ODSleft;
+    ColorSensor color;
+    CRServo beaconpusher;
 
     //logic objects
     double power;
@@ -34,6 +41,13 @@ public class manual extends OpMode {
         motorCatapult = hardwareMap.dcMotor.get("catapult");
 
         servoBeacon = hardwareMap.crservo.get("beacon");
+
+        ODSright = hardwareMap.opticalDistanceSensor.get("odsright");
+        ODSleft = hardwareMap.opticalDistanceSensor.get("odsleft");
+
+        beaconpusher = hardwareMap.crservo.get("beacon");
+
+        color = hardwareMap.colorSensor.get("color");
     }
     @Override
     public void loop(){
@@ -103,7 +117,7 @@ public class manual extends OpMode {
 
     }
     //you dont need to know what this does.
-    public static float[] map(float[] a, double minR, double maxR){
+    public float[] map(float[] a, double minR, double maxR){
         float min=Float.MAX_VALUE;
         float max=Float.MIN_VALUE;
         for(int i = 0;i<=3;i++){
