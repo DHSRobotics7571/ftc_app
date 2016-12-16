@@ -20,6 +20,7 @@ public class autoRed extends OpMode {
     private double thresholdmax = 0.1;
     //the farthest away the robot can be to the vision target
     private double thresholdmin = 0.1;
+    private long time;
     @Override
     public void init(){
         motorRightFront = hardwareMap.dcMotor.get("rightfront");
@@ -41,53 +42,42 @@ public class autoRed extends OpMode {
 
             case 1:
                 if(squareUp()){
-                    stopMotors();
+                    setThrottle(0);
                     robostate++;
                 }
                 break;
             case 2:
+                //squared up, go forward past the beacon.
                 setThrottle(.1);
                 robostate++;
                 break;
             case 3:
-                if (ODSleft.getRawLightDetected > 0.001){
-                    robostate = 5;
-                    break;
-                    }
-                        else{
-                            setThrottle(-.1);
-                            robostate++;
-                        break;
-                    }
-                }
-            case 4:
-                if (ODSleft.getRawLightDetected > 0.001) {
-                    robostate = 5;
-                    break;
-                }
-            case 5:
-                setThrottle(.05);
 
-                if (color > 9 && color < 11) {
-                    stopMotors();
+                if (ODSleft.getRawLightDetected() > 0.001){
+                    //not passed the beacon
+                }
+                else{
+                    //passed the beacon, start going backwards
+                    setThrottle(-.1);
+                    robostate++;
+
+                }
+                break;
+
+            case 4:
+                //check the color sensor input, if its within the threshold, stop and push it.
+                if (color.red() > 9 && color.red() < 11){
+                    setThrottle(0);
                     push();
                     robostate++;
                 }
                 break;
-            case 6:
-                //enter the run with and without encoders methods where needed
-                setThrottle(-.75);
-                if (ticks > 5600) {
-                    //i.e. 5 rotations(just an estimate)
-                    setThrottle(-.25);
-                    if (ODSleft.getRawLightDetected > 0.001) {
-                        squareUp();
-                        robostate++;
-                    }
-                }
-            case 7:
-                
+            case 5:
+                if(push()){
+                    //done pushing (beacon pusher is also retracted).
+                    //onto the second beacon
 
+                }
             default:
                 break;
         }
@@ -97,7 +87,22 @@ public class autoRed extends OpMode {
     public void stop(){
 
     }
-
+    public boolean push(){
+        if(time == 0){
+            time = System.currentTimeMillis();
+            beaconpusher.setPower(1);
+        }
+        else{
+            if(System.currentTimeMillis()-time>=4000){
+                beaconpusher.setPower(-1);
+            }
+            if(System.currentTimeMillis()-time>=8000){
+                beaconpusher.setPower(0);
+                return true;
+            }
+        }
+        return false;
+    }
     //square robot with the wall to push the beacons
     public boolean squareUp(){
         //initial check to see if close to vision target
@@ -141,13 +146,6 @@ public class autoRed extends OpMode {
         }
         //currently adjusting position, aren't squared up yet, return false
         return false;
-    }
-
-    public void stopMotors(){
-        motorRightBack.setPower(0);
-        motorRightFront.setPower(0);
-        motorLeftBack.setPower(0);
-        motorLeftFront.setPower(0);
     }
     /*
         If power is positive, goes forward
