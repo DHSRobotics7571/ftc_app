@@ -37,6 +37,8 @@ public class autoRed extends OpMode {
     @Override
     public void loop(){
         switch(robostate){
+            case 0:
+
             case 1:
                 if(squareUp()){
                     stopMotors();
@@ -78,6 +80,14 @@ public class autoRed extends OpMode {
                         //both sensors too close, back up.
                         strafe(-0.1);
                     } else{
+                        //one sensor too close, adjust that one.
+                        if(ODSright.getRawLightDetected()>thresholdmax){
+                            //god dammit right sensor you arent squared - fix it
+                            turn(0.1);
+                        }else{
+                            //god dammit left sensor you arent squared - fix it
+                            turn(-0.1);
+                        }
 
                     }
                 }
@@ -93,10 +103,7 @@ public class autoRed extends OpMode {
                 }
             }
         }
-        //
-
-        //return whether or not we are squared up
-
+        //currently adjusting position, aren't squared up yet, return false
         return false;
     }
 
