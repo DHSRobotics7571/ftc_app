@@ -9,9 +9,19 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 
 @TeleOp(name="Sensor Data Test", group="Manual")
-public class sensorDataTest extends manual {
+public class sensorDataTest extends drivetraintest {
     //logic objects
     double power;
+    OpticalDistanceSensor ODSright, ODSleft;
+    private ColorSensor color;
+    @Override
+    public void init(){
+        super.init();
+        color = hardwareMap.colorSensor.get("color");
+        ODSright = hardwareMap.opticalDistanceSensor.get("odsright");
+        ODSleft = hardwareMap.opticalDistanceSensor.get("odsright");
+
+    }
 
     @Override
     public void loop(){
