@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 
 @TeleOp(name="Autonomous - RED", group="Autonomous")
@@ -13,7 +14,7 @@ public class squareUpTest extends OpMode {
     private DcMotor motorRightFront,motorRightBack,motorLeftFront,motorLeftBack;
     private OpticalDistanceSensor ODSright, ODSleft;
     private ColorSensor color;
-    private CRServo beaconpusher;
+    //private CRServo beaconpusher;
     //instantiate logic objects
     private int robostate = 1;
     //the closest the robot can be to the vision target
@@ -40,22 +41,7 @@ public class squareUpTest extends OpMode {
     public void stop(){
         setThrottle(0);
     }
-    public boolean push(){
-        if(time == 0){
-            time = System.currentTimeMillis();
-            beaconpusher.setPower(1);
-        }
-        else{
-            if(System.currentTimeMillis()-time>=4000){
-                beaconpusher.setPower(-1);
-            }
-            if(System.currentTimeMillis()-time>=8000){
-                beaconpusher.setPower(0);
-                return true;
-            }
-        }
-        return false;
-    }
+
     //square robot with the wall to push the beacons
     public boolean squareUp(){
         //initial check to see if close to vision target
