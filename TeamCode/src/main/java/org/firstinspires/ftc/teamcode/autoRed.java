@@ -85,7 +85,7 @@ public class autoRed extends OpMode {
     }
     @Override
     public void stop(){
-
+        setThrottle(0);
     }
     public boolean push(){
         if(time == 0){
