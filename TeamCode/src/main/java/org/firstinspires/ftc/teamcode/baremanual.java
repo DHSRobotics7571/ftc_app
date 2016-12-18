@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 /**
  * Created by Andre on 12/18/2016.
  */
+@TeleOp(name="Drive + Feeder/catapult", group="Manual")
 public class baremanual extends drivetraintest {
     DcMotor motorFeeder;
     DcMotor motorCatapult;
