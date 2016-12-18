@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 @TeleOp(name="DriveTrainTest", group="Manual")
 public class drivetraintest extends OpMode {
     //instantiate objects
-    private DcMotor motorRightFront,motorRightBack,motorLeftFront,motorLeftBack;
+    public DcMotor motorRightFront,motorRightBack,motorLeftFront,motorLeftBack;
 
     @Override
     public void init(){
