@@ -55,13 +55,13 @@ public class drivetraintest extends OpMode {
         //Mecanum wheel drive - Vector Addition and subtraction
         float[] motorVals = {0,0,0,0};
         //Right Front
-        motorVals[0] = gamepad1.left_stick_y+gamepad1.right_stick_x+gamepad1.left_stick_x;
+        motorVals[0] = -gamepad1.left_stick_y+gamepad1.right_stick_x+gamepad1.left_stick_x;
         //Right Back
-        motorVals[1] = gamepad1.left_stick_y+gamepad1.right_stick_x-gamepad1.left_stick_x;
+        motorVals[1] = -gamepad1.left_stick_y+gamepad1.right_stick_x-gamepad1.left_stick_x;
         //Left Front
-        motorVals[2] = gamepad1.left_stick_y-gamepad1.right_stick_x-gamepad1.left_stick_x;
+        motorVals[2] = -gamepad1.left_stick_y-gamepad1.right_stick_x-gamepad1.left_stick_x;
         //Left Back
-        motorVals[3] = gamepad1.left_stick_y-gamepad1.right_stick_x+gamepad1.left_stick_x;
+        motorVals[3] = -gamepad1.left_stick_y-gamepad1.right_stick_x+gamepad1.left_stick_x;
         //Adjust range to that allowed by DcMotors
         motorVals = map(motorVals,-1,1);
         //Set power to motors
@@ -69,6 +69,12 @@ public class drivetraintest extends OpMode {
         motorRightBack.setPower(motorVals[1]);
         motorLeftFront.setPower(motorVals[2]);
         motorLeftBack.setPower(motorVals[3]);
+
+        telemetry.addData("RF",motorVals[0]);
+        telemetry.addData("RB",motorVals[1]);
+        telemetry.addData("LF",motorVals[2]);
+        telemetry.addData("LB",motorVals[3]);
+
     }
     @Override
     public void stop(){

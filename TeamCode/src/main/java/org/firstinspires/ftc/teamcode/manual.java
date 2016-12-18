@@ -85,13 +85,13 @@ public class manual extends OpMode {
         //Mecanum wheel drive - Vector Addition and subtraction
         float[] motorVals = {0,0,0,0};
         //Right Front
-        motorVals[0] = -gamepad1.left_stick_y-gamepad1.right_stick_x-gamepad1.left_stick_x;
+        motorVals[0] = -gamepad1.left_stick_y+gamepad1.right_stick_x+gamepad1.left_stick_x;
         //Right Back
-        motorVals[1] = -gamepad1.left_stick_y-gamepad1.right_stick_x+gamepad1.left_stick_x;
+        motorVals[1] = -gamepad1.left_stick_y+gamepad1.right_stick_x-gamepad1.left_stick_x;
         //Left Front
-        motorVals[2] = -gamepad1.left_stick_y+gamepad1.right_stick_x+gamepad1.left_stick_x;
+        motorVals[2] = -gamepad1.left_stick_y-gamepad1.right_stick_x-gamepad1.left_stick_x;
         //Left Back
-        motorVals[3] = -gamepad1.left_stick_y+gamepad1.right_stick_x-gamepad1.left_stick_x;
+        motorVals[3] = -gamepad1.left_stick_y-gamepad1.right_stick_x+gamepad1.left_stick_x;
         //Adjust range to that allowed by DcMotors
         motorVals = map(motorVals,-1,1);
         //Set power to motors
