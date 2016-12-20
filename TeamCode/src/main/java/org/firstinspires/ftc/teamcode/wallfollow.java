@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 
-@TeleOp()
+@TeleOp(name="Wall Ride", group="Autonomous")
 public class wallfollow extends OpMode {
     DcMotor mLF,mLB,mRF,mRB;
     OpticalDistanceSensor ODS;
