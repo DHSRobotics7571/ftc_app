@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 public class baremanual extends drivetraintest {
     DcMotor motorFeeder;
     DcMotor motorCatapult;
+    DcMotor motorLR;
+    DcMotor motorLL;
     @Override
     public void init(){
         super.init();
@@ -17,11 +19,16 @@ public class baremanual extends drivetraintest {
 
         motorCatapult = hardwareMap.dcMotor.get("catapult");
 
+        motorLR = hardwareMap.dcMotor.get("linearr");
+        motorLL = hardwareMap.dcMotor.get("linearl");
+
     }
     @Override
     public void loop(){
         super.loop();
         motorFeeder.setPower(gamepad2.left_stick_y);
         motorCatapult.setPower(gamepad2.right_stick_y);
+        motorLL.setPower(gamepad2.right_trigger-gamepad2.left_trigger);
+        motorLR.setPower(gamepad2.right_trigger-gamepad2.left_trigger);
     }
 }

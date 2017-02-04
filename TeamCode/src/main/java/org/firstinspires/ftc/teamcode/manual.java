@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name="Manual", group="Manual")
 public class manual extends OpMode {
@@ -17,10 +18,13 @@ public class manual extends OpMode {
     DcMotor motorCatapult;
 
     CRServo servoBeacon;
-
+    Servo servoFeeder;
+    Servo servoLinear;
+    Servo servoLinear2;
+    double throttlecontrol = 1;
     OpticalDistanceSensor ODSright, ODSleft;
     ColorSensor color;
-    CRServo beaconpusher;
+
 
     //logic objects
     double power;
@@ -41,14 +45,17 @@ public class manual extends OpMode {
         motorCatapult = hardwareMap.dcMotor.get("catapult");
 
         servoBeacon = hardwareMap.crservo.get("beacon");
+        servoFeeder = hardwareMap.servo.get("servofeeder");
+        servoLinear = hardwareMap.servo.get("servolinear");
+        servoLinear2 = hardwareMap.servo.get("servolinear2");
 
         ODSright = hardwareMap.opticalDistanceSensor.get("odsright");
         ODSleft = hardwareMap.opticalDistanceSensor.get("odsleft");
 
-        beaconpusher = hardwareMap.crservo.get("beacon");
 
         color = hardwareMap.colorSensor.get("color");
     }
+
     @Override
     public void loop(){
         /*
@@ -64,8 +71,8 @@ public class manual extends OpMode {
             left                -drive motor        left
             right               -drive motor        right
         RIGHT_STICK                             RIGHT_STICK
-            up                                      up                  -catapult
-            down                                    down                -catapult
+            up                                     up                  -catapult
+            down                                     down                -catapult
             left                -drive motor        left
             right               -drive motor        right
         BUTTONS                                 BUTTONS
@@ -80,8 +87,19 @@ public class manual extends OpMode {
             right_bumper        -beacon             right_bumper
 
          */
-
-
+        if(gamepad1.left_stick_button||gamepad1.right_stick_button){
+            throttlecontrol = 0.35;
+        }else throttlecontrol = 1;
+        if (gamepad2.dpad_up)
+            servoLinear.setPosition(.5);
+            servoLinear2.setPosition(1);
+        if (gamepad2.dpad_left)
+            servoLinear.setPosition(1);
+            servoLinear2.setPosition(.5);
+        if (gamepad2.x)
+            servoFeeder.setPosition(.3);
+        if (gamepad2.y)
+            servoFeeder.setPosition(0 );
         //Mecanum wheel drive - Vector Addition and subtraction
         float[] motorVals = {0,0,0,0};
         //Right Front
@@ -95,10 +113,10 @@ public class manual extends OpMode {
         //Adjust range to that allowed by DcMotors
         motorVals = map(motorVals,-1,1);
         //Set power to motors
-        motorRightFront.setPower(motorVals[0]);
-        motorRightBack.setPower(motorVals[1]);
-        motorLeftFront.setPower(motorVals[2]);
-        motorLeftBack.setPower(motorVals[3]);
+        motorRightFront.setPower(motorVals[0]*throttlecontrol);
+        motorRightBack.setPower(motorVals[1]*throttlecontrol);
+        motorLeftFront.setPower(motorVals[2]*throttlecontrol);
+        motorLeftBack.setPower(motorVals[3]*throttlecontrol);
 
         motorLinearLeft.setPower(gamepad2.left_trigger - gamepad2.right_trigger);
         motorLinearRight.setPower(gamepad2.left_trigger - gamepad2.right_trigger);
@@ -112,6 +130,7 @@ public class manual extends OpMode {
         }else if(gamepad1.left_bumper) power = -1;
         servoBeacon.setPower(power);
     }
+
     @Override
     public void stop(){
 
