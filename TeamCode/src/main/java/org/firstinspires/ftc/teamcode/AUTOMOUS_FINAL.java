@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name="Autonomous Final", group="Autonomous")
+@TeleOp(name="Autonomous ffs", group="Autonomous")
 public class AUTOMOUS_FINAL extends OpMode {
     int robostate = 0;
     double throttlecontrol = 1;
@@ -36,9 +36,19 @@ public class AUTOMOUS_FINAL extends OpMode {
         //3656 ticks to firing plane
         switch (robostate){
             case 1:
-                motorLeftBack.
+
                 motorLeftBack.setTargetPosition(3656);
+                motorLeftBack.RunMode.RUN_TO_POSITION();
                 setThrottle(1);
+                robostate++;
+                break;
+
+         /*   case 2:
+
+                if (!motorLeftFront.isBusy()){
+                    setThrottle(0);
+                }
+*/
 
         }
 

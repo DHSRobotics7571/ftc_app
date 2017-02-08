@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 
-@TeleOp(name="Autonomous - ffs", group="Autonomous")
+@TeleOp(name="Autonomous - kys", group="Autonomous")
 public class autoBlueNoMech extends OpMode {
     //instantiate objects
     private DcMotor motorRightFront,motorRightBack,motorLeftFront,motorLeftBack;
