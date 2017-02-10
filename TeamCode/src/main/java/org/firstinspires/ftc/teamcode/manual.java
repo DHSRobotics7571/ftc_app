@@ -54,6 +54,9 @@ public class manual extends OpMode {
 
 
         color = hardwareMap.colorSensor.get("color");
+
+        servoLinear.setPosition(0);
+        servoLinear.setPosition(1);
     }
 
     @Override

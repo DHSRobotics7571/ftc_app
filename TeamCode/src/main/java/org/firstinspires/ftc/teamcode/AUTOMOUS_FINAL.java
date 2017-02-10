@@ -29,15 +29,15 @@ public class AUTOMOUS_FINAL extends OpMode {
         motorLeftBack = hardwareMap.dcMotor.get("leftback");
         motorLeftFront.setDirection(DcMotorSimple.Direction.REVERSE);
         motorLeftBack.setDirection(DcMotorSimple.Direction.REVERSE);
-        servoFeeder = hardwareMap.servo.get("servofeeder");
 
+        servoFeeder = hardwareMap.servo.get("servoFeeder");
     }
 
     public void loop() {
         //3656 ticks to firing plane
-        switch (robostate){
+        switch (robostate) {
             case 1:
-
+            {
                 motorLeftBack.setTargetPosition(3656);
                 motorRightBack.setTargetPosition(3656);
                 motorLeftFront.setTargetPosition(3656);
@@ -51,14 +51,28 @@ public class AUTOMOUS_FINAL extends OpMode {
                 setThrottle(1);
                 robostate++;
                 break;
+        }
+                case 2: {
 
-         /*   case 2:
-
-                if (!motorLeftFront.isBusy()){
-                    setThrottle(0);
+                    if (!motorLeftFront.isBusy()) {
+                        setThrottle(0);
+                    }
                 }
-*/
 
+            case 3:
+                motorCatapult.setTargetPosition(1120);
+                motorCatapult.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                motorCatapult.setPower(1);
+                if (!motorCatapult.isBusy()){
+                    servoFeeder.setPosition(1);
+                }
+                robostate++;
+                break;
+            case 4:
+                motorCatapult.setMode(DcMotor.RunMode.RESET_ENCODERS);
+                motorCatapult.setTargetPosition(1120);
+                motorCatapult.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                motorCatapult.setPower(1);
         }
 
     }
