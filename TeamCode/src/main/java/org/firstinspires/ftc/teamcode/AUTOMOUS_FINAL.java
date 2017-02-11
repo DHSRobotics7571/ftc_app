@@ -16,8 +16,6 @@ public class AUTOMOUS_FINAL extends OpMode {
     double throttlecontrol = 1;
 
     DcMotor motorRightFront,motorRightBack,motorLeftFront,motorLeftBack;
-    DcMotor motorLinearRight,motorLinearLeft;
-    DcMotor motorFeeder;
     DcMotor motorCatapult;
 
     Servo servoFeeder;
@@ -33,6 +31,7 @@ public class AUTOMOUS_FINAL extends OpMode {
         servoFeeder = hardwareMap.servo.get("servoFeeder");
     }
 
+    @Override
     public void loop() {
         //3656 ticks to firing plane
         switch (robostate) {
