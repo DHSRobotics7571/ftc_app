@@ -55,6 +55,7 @@ public class AUTOMOUS_FINAL extends OpMode {
 
                     if (!motorLeftFront.isBusy()) {
                         setThrottle(0);
+                        robostate++;
                     }
                 }
 
@@ -72,6 +73,12 @@ public class AUTOMOUS_FINAL extends OpMode {
                 motorCatapult.setTargetPosition(1120);
                 motorCatapult.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 motorCatapult.setPower(1);
+                robostate++;
+                break;
+            case 5:
+                if (!motorCatapult.isBusy()){
+                    motorCatapult.setPower(0);
+                }
         }
 
     }
