@@ -18,6 +18,7 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
 public class SmallBot extends OpMode{
     //varibles
     int robo = 1;
+    long time;
 
     //motors
     DcMotor left;
@@ -64,8 +65,16 @@ public class SmallBot extends OpMode{
                 break;
             case 3:
 
-                wallFollow();
-                robo++;
+                if (range1Cache[0] >= 10) {
+                right.setPower(.1);
+                left.setPower(.4);
+
+            }
+                if (range1Cache[0] < 10){
+                left.setPower(.1);
+                right.setPower(.4);
+            }
+
             case 4:
                 if (color.blue() >= 1 && color.blue() <= 3){
 
@@ -90,17 +99,20 @@ public class SmallBot extends OpMode{
 
     }
     public void wallFollow(){
-        if (range1Cache[0] > 10 ) {
+        if (range1Cache[0] > 5) {
             right.setPower(.2);
             left.setPower(.4);
+            time = System.currentTimeMillis();
 
         }
-        if (range1Cache[0] == 5){
-            setThrottle(.2);
-        }
-        if (range1Cache[0] <= 3){
+        if (range1Cache[0] <= 5){
             left.setPower(.2);
             right.setPower(.4);
+        }
+        if (range1Cache[0] <= 3){
+
+            time = System.currentTimeMillis();
+
         }
 
         //reachBeacon
