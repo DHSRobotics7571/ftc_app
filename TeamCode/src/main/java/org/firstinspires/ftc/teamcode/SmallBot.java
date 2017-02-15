@@ -54,8 +54,11 @@ public class SmallBot extends OpMode{
     public void loop(){
 
         range1Cache = RANGE1Reader.read(RANGE1_REG_START, RANGE1_READ_LENGTH);
-        right.setPower(0.5-(15-range1Cache[0]));
-        left.setPower(0.5-(15-range1Cache[0]));
+        right.setPower(0.3-(0.02*(20-range1Cache[0])));
+        left.setPower(0.3+(0.02*(20-range1Cache[0])));
+
+        if(right.getPower()<0)right.setPower(0);
+        if(left.getPower()<0)left.setPower(0);
 
 
 
