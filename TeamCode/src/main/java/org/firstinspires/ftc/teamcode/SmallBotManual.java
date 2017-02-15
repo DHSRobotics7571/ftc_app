@@ -14,8 +14,8 @@ import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
 
-@TeleOp(name = "SmallBot" , group = "Autonomous")
-public class SmallBot extends OpMode{
+@TeleOp(name = "SmallBotManual" , group = "Manual")
+public class SmallBotManual extends OpMode{
     //varibles
     int robo = 1;
     long time;
@@ -41,7 +41,7 @@ public class SmallBot extends OpMode{
 
         left = hardwareMap.dcMotor.get("left");
         right = hardwareMap.dcMotor.get("right");
-        right.setDirection(DcMotorSimple.Direction.REVERSE);
+        left.setDirection(DcMotorSimple.Direction.REVERSE);
 
         color = hardwareMap.colorSensor.get("color");
 
@@ -53,14 +53,14 @@ public class SmallBot extends OpMode{
     //
     public void loop(){
 
+
+        right.setPower(gamepad1.right_stick_y);
+        left.setPower(gamepad1.left_stick_y);
+
+
+
+
         range1Cache = RANGE1Reader.read(RANGE1_REG_START, RANGE1_READ_LENGTH);
-        right.setPower(0.5-(15-range1Cache[0]));
-        left.setPower(0.5-(15-range1Cache[0]));
-
-
-
-
-
 
         telemetry.addData("Ultra Sonic", range1Cache[0] & 0xFF);
         telemetry.addData("ODS", range1Cache[1] & 0xFF);

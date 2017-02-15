@@ -93,12 +93,12 @@ public class manual extends OpMode {
         if(gamepad1.left_stick_button||gamepad1.right_stick_button){
             throttlecontrol = 0.35;
         }else throttlecontrol = 1;
-        if (gamepad2.dpad_up)
+        if (gamepad2.dpad_up){
             servoLinear.setPosition(.5);
-            servoLinear2.setPosition(1);
-        if (gamepad2.dpad_left)
+            servoLinear2.setPosition(1);}
+        if (gamepad2.dpad_left){
             servoLinear.setPosition(1);
-            servoLinear2.setPosition(.5);
+            servoLinear2.setPosition(.5);}
         if (gamepad2.x)
             servoFeeder.setPosition(.3);
         if (gamepad2.y)
