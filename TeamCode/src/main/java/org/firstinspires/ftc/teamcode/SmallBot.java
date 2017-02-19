@@ -14,22 +14,28 @@ import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
+import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import java.util.ArrayList;
 
 @TeleOp(name = "SmallBot" , group = "Autonomous")
 public class SmallBot extends OpMode{
     //varibles
-    int robo = 0;
+    int robo = 1;
     long time;
+    int index = 0;
+
+    ArrayList<Byte> ranges = new ArrayList<Byte>();
 
     //motors
     DcMotor left;
     DcMotor right;
 
-    CRServo pusher;
-
-    ColorSensor color;
-
+   // ColorSensor color;
+    CRServo servo;
     byte[] range1Cache; //The read will return an array of bytes. They are stored in this variable
 
     I2cAddr RANGE1ADDRESS = new I2cAddr(0x14); //Default I2C address for MR Range (7-bit)
@@ -38,83 +44,139 @@ public class SmallBot extends OpMode{
 
     public I2cDevice RANGE1;
     public I2cDeviceSynch RANGE1Reader;
-
+    OpticalDistanceSensor ODSright;
+    OpticalDistanceSensor ODSleft;
     //
+    /* Declare OpMode members. */
+    private ElapsedTime runtime = new ElapsedTime();
+
+    byte[] colorCcache;
+
+    I2cDevice colorC;
+    I2cDeviceSynch colorCreader;
+
+    TouchSensor touch;         //Instance of TouchSensor - for changing color sensor mode
+
+    boolean touchState = false;  //Tracks the last known state of the touch sensor
+    boolean LEDState = true;     //Tracks the mode of the color sensor; Active = true, Passive = false
     @Override
     public void init() {
 
         left = hardwareMap.dcMotor.get("left");
         right = hardwareMap.dcMotor.get("right");
         right.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        pusher = hardwareMap.crservo.get("servo");
-
-        color = hardwareMap.colorSensor.get("color");
-
+        ODSright = hardwareMap.opticalDistanceSensor.get("odsright");
+        ODSleft = hardwareMap.opticalDistanceSensor.get("odsleft");
+        //color = hardwareMap.colorSensor.get("color");
+        servo = hardwareMap.crservo.get("servo");
         RANGE1 = hardwareMap.i2cDevice.get("range");
         RANGE1Reader = new I2cDeviceSynchImpl(RANGE1, RANGE1ADDRESS, false);
-        //RANGE1Reader.engage();
+        RANGE1Reader.engage();
+
+        telemetry.addData("Status", "Initialized");
+
+        //the below lines set up the configuration file
+        colorC = hardwareMap.i2cDevice.get("cc");
+        colorCreader = new I2cDeviceSynchImpl(colorC, I2cAddr.create8bit(0x3c), false);
+        colorCreader.engage();
+
+        touch = hardwareMap.touchSensor.get("t");
+        colorCreader.write8(3, 1);
 
     }
-    //
+    public void start(){
+        colorCreader.write8(3, 1);
+    }
+    double color = 0;
     public void loop() {
 
         range1Cache = RANGE1Reader.read(RANGE1_REG_START, RANGE1_READ_LENGTH);
-        //right.setPower(0.3-(0.02*(20-range1Cache[0])));
-        //left.setPower(0.3+(0.02*(20-range1Cache[0])));
+        colorCcache = colorCreader.read(0x04, 1);
 
-        // if(right.getPower()<0)right.setPower(0);
-        //if(left.getPower()<0)left.setPower(0);
-
+        telemetry.addData("2 #C", colorCcache[0] & 0xFF);
+        color = colorCcache[0] & 0xFF;
+        double rightTrim = 0, leftTrim = 0;
         switch (robo) {
-            case 0:
-                setThrottle(.2);
-                RANGE1Reader.engage();
-                if (range1Cache[0] > 15) {
-                    left.setPower(.1);
-                    right.setPower(.3);
-                }
-                if (range1Cache[0] == 15){
-                    setThrottle(.2);
+            case 1:
+                setThrottle(.3);
+                if(ODSright.getRawLightDetected() > 1.51){
+                    setThrottle(-0.1);
+                    robo++;
                 }
 
-                if (range1Cache[0] < 15){
-                    right.setPower(.1);
-                    left.setPower(.3);
-                }
-                if (color.blue() < 3 && color.blue() > 3){
+                break;
+            case 2:
+                //derivative();
+                if(ODSleft.getRawLightDetected() > 1.51 && ODSright.getRawLightDetected() > 1.51){
+                    servo.setPower(-0.3);
+                    setThrottle(0);
                     robo++;
                     break;
                 }
+                if (ODSright.getRawLightDetected() > 1.51) {
+                    leftTrim = -0.1;
+                    rightTrim = 0.1;
+                }else if(ODSleft.getRawLightDetected() > 1.51){
+                    leftTrim = 0.1;
+                    rightTrim = -0.1;
+                }else{
+                    rightTrim = 0.1; leftTrim= 0.1;
+                }
+                right.setPower(-rightTrim);
+                left.setPower(-leftTrim);
 
-            case 1:
-
-
-                if (color.blue() < 3 && color.blue() > 1) {
-                    setThrottle(0);
+                break;
+            case 3:
+                if(color >=2 && color < 5){
+                    servo.setPower(0);
                     setThrottle(-.05);
-                    if (color.blue() < 3 && color.blue() > 1){
-                        setThrottle(0);
-                        pusher.setPower(-.75);
-                        time = System.currentTimeMillis();
-                        robo++;
-                        break;
-                    }
-
+                    robo++;
                 }
-            case 2:
-                if (System.currentTimeMillis() == time + 3000) {
-                    pusher.setPower(1);
+                if(color >= 10){
+                    robo++;
+                }
+
+                break;
+            case 4:
+                if(color >=10){
+                    setThrottle(0);
+                    servo.setPower(-1);
                     time = System.currentTimeMillis();
-                    if (System.currentTimeMillis() == time + 3000) {
-                        pusher.setPower(0);
-                    }
+                    robo++;
+
                 }
+                break;
+            case 5:
+
+        }
 
 
-                telemetry.addData("Ultra Sonic", range1Cache[0] & 0xFF);
-                telemetry.addData("ODS", range1Cache[1] & 0xFF);
-                //telemetry.addData("Color", );
+
+        telemetry.addData("Ultra Sonic", range1Cache[0] & 0xFF);
+        telemetry.addData("ODS", range1Cache[1] & 0xFF);
+//        telemetry.addData("Blue", color.blue());
+//        telemetry.addData("RED", color.red());
+//        telemetry.addData("Green", color.green());
+        telemetry.addData("case", robo);
+    }
+    public void derivative(){
+        ranges.add(range1Cache[0]);
+
+        if (ranges.size() == 1)
+            return;
+        index++;
+        if(Math.abs(range1Cache[0] - ranges.get(index-1))>100){
+            index--;
+            ranges.remove(ranges.size()-1);
+            return;
+        }
+
+        if (ranges.get(index) - ranges.get(index - 1) >= 1) {
+            setThrottle(0);
+            servo.setPower(-0.75);
+            time = System.currentTimeMillis();
+            robo++;
+
         }
     }
     public void setThrottle(double throttle){
@@ -123,20 +185,16 @@ public class SmallBot extends OpMode{
 
     }
     public void wallFollow(){
-        if (range1Cache[0] > 18) {
-            left.setPower(.2);
-            right.setPower(.4);
+        double trim = 12-range1Cache[0];
+        if(trim>0){
+            trim*=trim;
+        }else{
+            trim*=-trim;
         }
-        if (range1Cache[0] == 18){
-            setThrottle(.2);
-        }
+        right.setPower(0.5-(0.01*(trim)));
+        left.setPower(0.5+(0.01*(trim)));
 
-        if (range1Cache[0] < 18){
-            right.setPower(.2);
-            left.setPower(.4);
-        }
-
-        //reachBeacon
-        robo++;
+        if(right.getPower()<0)right.setPower(0);
+        if(left.getPower()<0)left.setPower(0);
     }
 }
