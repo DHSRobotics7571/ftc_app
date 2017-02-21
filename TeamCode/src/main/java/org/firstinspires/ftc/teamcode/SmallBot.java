@@ -199,6 +199,7 @@ public class SmallBot extends OpMode{
                 }
                 break;
             case 8:
+                //
                 right.setPower(0);
                 left.setPower(0.3);
                 robo++;
