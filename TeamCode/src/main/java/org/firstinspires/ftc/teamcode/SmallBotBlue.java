@@ -22,8 +22,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.ArrayList;
 
-@TeleOp(name = "SmallBotRed" , group = "Autonomous")
-public class SmallBot extends OpMode{
+@TeleOp(name = "SmallBotBlue - No Balls" , group = "Autonomous")
+public class SmallBotBlue extends OpMode{
     //varibles
     int robo = 1;
     long time;
@@ -35,7 +35,7 @@ public class SmallBot extends OpMode{
     DcMotor left;
     DcMotor right;
 
-   // ColorSensor color;
+    // ColorSensor color;
     CRServo servo;
     byte[] range1Cache; //The read will return an array of bytes. They are stored in this variable
 
@@ -128,18 +128,18 @@ public class SmallBot extends OpMode{
 
                 break;
             case 3:
-                if(color >=2 && color < 5){
+                if(color >= 10){
                     servo.setPower(0);
                     setThrottle(-.05);
                     robo++;
                 }
-                if(color >= 10){
+                if(color >= 1 && color <= 4){
                     robo++;
                 }
 
                 break;
             case 4:
-                if(color >=10){
+                if(color >= 1 && color <= 4){
                     setThrottle(0);
                     servo.setPower(-1);
                     time = System.currentTimeMillis();
