@@ -25,7 +25,7 @@ import java.util.ArrayList;
 @TeleOp(name = "SmallBotRed" , group = "Autonomous")
 public class SmallBot extends OpMode{
     //varibles
-    int robo = 1;
+    int robo = 0;
     long time;
     int index = 0;
 
@@ -45,6 +45,7 @@ public class SmallBot extends OpMode{
 
     public I2cDevice RANGE1;
     public I2cDeviceSynch RANGE1Reader;
+
     OpticalDistanceSensor ODSright;
     OpticalDistanceSensor ODSleft;
     //
@@ -56,7 +57,7 @@ public class SmallBot extends OpMode{
     I2cDevice colorC;
     I2cDeviceSynch colorCreader;
 
-    TouchSensor touch;         //Instance of TouchSensor - for changing color sensor mode
+    TouchSensor Spongebob;         //Instance of TouchSensor - for changing color sensor mode
 
     boolean touchState = false;  //Tracks the last known state of the touch sensor
     boolean LEDState = true;     //Tracks the mode of the color sensor; Active = true, Passive = false
@@ -81,7 +82,7 @@ public class SmallBot extends OpMode{
         colorCreader = new I2cDeviceSynchImpl(colorC, I2cAddr.create8bit(0x3c), false);
         colorCreader.engage();
 
-        touch = hardwareMap.touchSensor.get("t");
+        Spongebob = hardwareMap.touchSensor.get("t");
         colorCreader.write8(3, 1);
 
     }
@@ -89,6 +90,8 @@ public class SmallBot extends OpMode{
         colorCreader.write8(3, 1);
     }
     double color = 0;
+    double count = 1;
+    double initRange = 0;
     public void loop() {
 
         range1Cache = RANGE1Reader.read(RANGE1_REG_START, RANGE1_READ_LENGTH);
@@ -98,8 +101,27 @@ public class SmallBot extends OpMode{
         color = colorCcache[0] & 0xFF;
         double rightTrim = 0, leftTrim = 0;
         switch (robo) {
+            case 0:
+
+
+                setThrottle(0.3);
+                robo++;
+                break;
             case 1:
-                setThrottle(.3);
+                if(count==2 || count==4){
+                    if (initRange == 0) initRange = range1Cache[0];
+                    double trim = initRange-range1Cache[0];
+                    if(trim>0){
+                        trim*=trim;
+                    }else{
+                        trim*=-trim;
+                    }
+                    right.setPower(0.3-(0.01*(trim)));
+                    left.setPower(0.3+(0.01*(trim)));
+
+                    if(right.getPower()<0)right.setPower(0);
+                    if(left.getPower()<0)left.setPower(0);
+                }
                 if(ODSright.getRawLightDetected() > 1.51){
                     setThrottle(-0.1);
                     robo++;
@@ -108,6 +130,9 @@ public class SmallBot extends OpMode{
                 break;
             case 2:
                 //derivative();
+
+
+
                 if(ODSleft.getRawLightDetected() > 1.51 && ODSright.getRawLightDetected() > 1.51){
                     servo.setPower(-0.3);
                     setThrottle(0);
@@ -155,7 +180,7 @@ public class SmallBot extends OpMode{
                 }
                 break;
             case 6:
-                if(System.currentTimeMillis() - time >= 3000){
+                if(Spongebob.isPressed()){
                     servo.setPower(0);
                     robo++;
                     setThrottle(0.3);
@@ -164,9 +189,58 @@ public class SmallBot extends OpMode{
                 break;
             case 7:
                 if(System.currentTimeMillis() - time >= 1000){
-                    robo = 1;
+                    if(count == 1 || count == 3){
+                        robo = 0;
+                        count++;
+                    } else if(count == 2){
+                            robo++;
+                            count++;
+                        }
+                }
+                break;
+            case 8:
+                right.setPower(0);
+                left.setPower(0.3);
+                robo++;
+                break;
+            case 9:
+                ranges.add(range1Cache[0]);
+
+                if (ranges.size() == 1)
+                    break;
+                index++;
+                if(Math.abs(range1Cache[0] - ranges.get(index-1))>100){
+                    index--;
+                    ranges.remove(ranges.size()-1);
                     break;
                 }
+
+                if (ranges.get(index) - ranges.get(index - 1) <= -1) {
+                    robo++;
+                    ranges.clear();
+                    index = 0;
+
+                }
+                break;
+            case 10:
+                ranges.add(range1Cache[0]);
+
+                if (ranges.size() == 1)
+                    break;
+                index++;
+                if(Math.abs(range1Cache[0] - ranges.get(index-1))>100){
+                    index--;
+                    ranges.remove(ranges.size()-1);
+                    break;
+                }
+
+                if (ranges.get(index) - ranges.get(index - 1) >= 1) {
+                    setThrottle(0);
+                    robo=0;
+
+                }
+                break;
+
 
         }
 
@@ -178,26 +252,10 @@ public class SmallBot extends OpMode{
 //        telemetry.addData("RED", color.red());
 //        telemetry.addData("Green", color.green());
         telemetry.addData("case", robo);
+        telemetry.addData("count", count);
     }
     public void derivative(){
-        ranges.add(range1Cache[0]);
 
-        if (ranges.size() == 1)
-            return;
-        index++;
-        if(Math.abs(range1Cache[0] - ranges.get(index-1))>100){
-            index--;
-            ranges.remove(ranges.size()-1);
-            return;
-        }
-
-        if (ranges.get(index) - ranges.get(index - 1) >= 1) {
-            setThrottle(0);
-            servo.setPower(-0.75);
-            time = System.currentTimeMillis();
-            robo++;
-
-        }
     }
     public void setThrottle(double throttle){
         left.setPower(throttle);
