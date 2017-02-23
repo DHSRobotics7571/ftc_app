@@ -37,6 +37,7 @@ public class SmallBot extends OpMode{
 
    // ColorSensor color;
     CRServo servo;
+    CRServo servo2;
     byte[] range1Cache; //The read will return an array of bytes. They are stored in this variable
 
     I2cAddr RANGE1ADDRESS = new I2cAddr(0x14); //Default I2C address for MR Range (7-bit)
@@ -52,15 +53,19 @@ public class SmallBot extends OpMode{
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
 
+    byte[] colorAcache;
     byte[] colorCcache;
 
+    I2cDevice colorA;
     I2cDevice colorC;
+    I2cDeviceSynch colorAreader;
     I2cDeviceSynch colorCreader;
 
     TouchSensor Spongebob;         //Instance of TouchSensor - for changing color sensor mode
 
     boolean touchState = false;  //Tracks the last known state of the touch sensor
     boolean LEDState = true;     //Tracks the mode of the color sensor; Active = true, Passive = false
+
     @Override
     public void init() {
 
@@ -75,11 +80,15 @@ public class SmallBot extends OpMode{
         RANGE1Reader = new I2cDeviceSynchImpl(RANGE1, RANGE1ADDRESS, false);
         RANGE1Reader.engage();
 
-        telemetry.addData("Status", "Initialized");
+        servo2 = hardwareMap.crservo.get("servo2");
 
-        //the below lines set up the configuration file
-        colorC = hardwareMap.i2cDevice.get("cc");
-        colorCreader = new I2cDeviceSynchImpl(colorC, I2cAddr.create8bit(0x3c), false);
+        colorA = hardwareMap.i2cDevice.get("cc");
+        colorC = hardwareMap.i2cDevice.get("ca");
+
+        colorAreader = new I2cDeviceSynchImpl(colorA, I2cAddr.create8bit(0x42), false);
+        colorCreader = new I2cDeviceSynchImpl(colorC, I2cAddr.create8bit(0x70), false);
+
+        colorAreader.engage();
         colorCreader.engage();
 
         Spongebob = hardwareMap.touchSensor.get("t");
@@ -87,9 +96,11 @@ public class SmallBot extends OpMode{
 
     }
     public void start(){
+        colorAreader.write8(3, 1);
         colorCreader.write8(3, 1);
     }
     double color = 0;
+    double color2 = 0;
     double count = 1;
     double initRange = 0;
     public void loop() {
@@ -100,16 +111,20 @@ public class SmallBot extends OpMode{
         telemetry.addData("2 #C", colorCcache[0] & 0xFF);
         color = colorCcache[0] & 0xFF;
         double rightTrim = 0, leftTrim = 0;
+        beaconSet();
         switch (robo) {
             case 0:
 
 
                 setThrottle(0.3);
+                initRange = 0;
                 robo++;
                 break;
             case 1:
                 if(count==2 || count==4){
                     if (initRange == 0) initRange = range1Cache[0];
+                    if (initRange>20) initRange = 20;
+                    if (initRange<10) initRange = 15;
                     double trim = initRange-range1Cache[0];
                     if(trim>0){
                         trim*=trim;
@@ -129,10 +144,6 @@ public class SmallBot extends OpMode{
 
                 break;
             case 2:
-                //derivative();
-
-
-
                 if(ODSleft.getRawLightDetected() > 1.51 && ODSright.getRawLightDetected() > 1.51){
                     servo.setPower(-0.3);
                     setThrottle(0);
@@ -153,31 +164,23 @@ public class SmallBot extends OpMode{
 
                 break;
             case 3:
-                if(color >=2 && color < 5){
+                if(ODSleft.getRawLightDetected() < 1.51 || ODSright.getRawLightDetected() < 1.51){
                     servo.setPower(0);
-                    setThrottle(-.05);
+                    setThrottle(-0.1);
+                    robo--;
+                    break;
+                }
+                servo.setPower(-1);
+                if(color>=10 && color2>=10){
+                    servo.setPower(1);
                     robo++;
                 }
-                if(color >= 10){
-                    robo++;
-                }
-
                 break;
             case 4:
-                if(color >=10){
-                    setThrottle(0);
-                    servo.setPower(-1);
-                    time = System.currentTimeMillis();
-                    robo++;
-
-                }
+                robo++;
                 break;
             case 5:
-                if(System.currentTimeMillis() - time >= 3000){
-                    robo++;
-                    servo.setPower(1);
-                    time = System.currentTimeMillis();
-                }
+                robo++;
                 break;
             case 6:
                 if(Spongebob.isPressed()){
@@ -195,7 +198,10 @@ public class SmallBot extends OpMode{
                     } else if(count == 2){
                             robo++;
                             count++;
-                        }
+                    } else{
+                        robo = -1;
+                        setThrottle(0);
+                    }
                 }
                 break;
             case 8:
@@ -239,6 +245,7 @@ public class SmallBot extends OpMode{
                     setThrottle(0);
                     robo=0;
 
+
                 }
                 break;
 
@@ -255,8 +262,25 @@ public class SmallBot extends OpMode{
         telemetry.addData("case", robo);
         telemetry.addData("count", count);
     }
-    public void derivative(){
+    public void beaconSet(){
+        colorAcache = colorAreader.read(0x04, 1);
+        colorCcache = colorCreader.read(0x04, 1);
 
+        color = colorAcache[0] & 0xFF;
+        color2 = colorCcache[0] & 0xFF;
+
+        if(color2 >= 10){
+            servo2.setPower(1);
+        } else if(color>= 10){
+            servo2.setPower(-1);
+        } else{
+            servo2.setPower(0);
+        }
+
+        if(color>=2 && color<=5 && color2>=2 && color2<=5){
+            servo2.setPower(1);
+        }
+        telemetry.addData("input", color + ","+ color2);
     }
     public void setThrottle(double throttle){
         left.setPower(throttle);
