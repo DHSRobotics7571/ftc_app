@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 
 import android.graphics.Color;
 
+import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.robotcore.eventloop.SyncdDevice;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -30,6 +31,8 @@ public class SmallBot extends OpMode{
     int index = 0;
 
     ArrayList<Byte> ranges = new ArrayList<Byte>();
+
+    ArrayList<Byte> temp = new ArrayList<Byte>();
 
     //motors
     DcMotor left;
@@ -65,6 +68,10 @@ public class SmallBot extends OpMode{
 
     boolean touchState = false;  //Tracks the last known state of the touch sensor
     boolean LEDState = true;     //Tracks the mode of the color sensor; Active = true, Passive = false
+
+    boolean done = false;
+    boolean adjust = false;
+    boolean direction = false;
 
     @Override
     public void init() {
@@ -116,28 +123,20 @@ public class SmallBot extends OpMode{
             case 0:
 
 
-                setThrottle(0.3);
+                setThrottle(0.5);
                 initRange = 0;
                 robo++;
                 break;
             case 1:
                 if(count==2 || count==4){
                     if (initRange == 0) initRange = range1Cache[0];
-                    if (initRange>20) initRange = 20;
+                    if (initRange>23) initRange = 23;
                     if (initRange<10) initRange = 15;
-                    double trim = initRange-range1Cache[0];
-                    if(trim>0){
-                        trim*=trim;
-                    }else{
-                        trim*=-trim;
-                    }
-                    right.setPower(0.3-(0.01*(trim)));
-                    left.setPower(0.3+(0.01*(trim)));
 
-                    if(right.getPower()<0)right.setPower(0);
-                    if(left.getPower()<0)left.setPower(0);
+                    if (!adjust) wallFollow(initRange);
+                    if (adjust) adjust();
                 }
-                if(ODSright.getRawLightDetected() > 1.51){
+                if(ODSright.getRawLightDetected() > 1.21){
                     setThrottle(-0.1);
                     robo++;
                 }
@@ -186,6 +185,11 @@ public class SmallBot extends OpMode{
                 if(Spongebob.isPressed()){
                     servo.setPower(0);
                     robo++;
+                    if(count==4){
+                        robo = -1;
+                        setThrottle(0);
+                        break;
+                    }
                     setThrottle(0.3);
                     time = System.currentTimeMillis();
                 }
@@ -207,8 +211,10 @@ public class SmallBot extends OpMode{
             case 8:
                 //
                 right.setPower(0);
-                left.setPower(0.3);
+                left.setPower(0.30);
                 robo++;
+                ranges.clear();
+                index = 0;
                 break;
             case 9:
                 ranges.add(range1Cache[0]);
@@ -216,14 +222,18 @@ public class SmallBot extends OpMode{
                 if (ranges.size() == 1)
                     break;
                 index++;
-                if(Math.abs(range1Cache[0] - ranges.get(index-1))>100){
+                if(Math.abs(range1Cache[0] - ranges.get(index-1))>100 || range1Cache[0] < 10){
                     index--;
                     ranges.remove(ranges.size()-1);
+                    DbgLog.msg("Removed Bad Data " + range1Cache);
                     break;
                 }
-
-                if (ranges.get(index) - ranges.get(index - 1) <= -1) {
+                DbgLog.msg("Case 9:" + range1Cache[0] +"," + (ranges.get(index) - ranges.get(index - 1)));
+                if (ranges.get(index) - ranges.get(index - 1) <= -2) {
                     robo++;
+                    left.setPower(0.15);
+                    temp.addAll(ranges);
+                    temp.add(null);
                     ranges.clear();
                     index = 0;
 
@@ -235,14 +245,16 @@ public class SmallBot extends OpMode{
                 if (ranges.size() == 1)
                     break;
                 index++;
-                if(Math.abs(range1Cache[0] - ranges.get(index-1))>100){
+                if(Math.abs(range1Cache[0] - ranges.get(index-1))>100 || range1Cache[0] < 10){
                     index--;
                     ranges.remove(ranges.size()-1);
+                    DbgLog.msg("Removed Bad Data " + range1Cache);
                     break;
                 }
-
+                DbgLog.msg("Case 10:" + range1Cache[0] +"," + (ranges.get(index) - ranges.get(index - 1)));
                 if (ranges.get(index) - ranges.get(index - 1) >= 1) {
                     setThrottle(0);
+                    temp.addAll(ranges);
                     robo=0;
 
 
@@ -261,6 +273,14 @@ public class SmallBot extends OpMode{
 //        telemetry.addData("Green", color.green());
         telemetry.addData("case", robo);
         telemetry.addData("count", count);
+    }
+    @Override
+    public void stop(){
+
+        DbgLog.msg(temp.toString());
+        servo.setPower(0);
+        servo2.setPower(0);
+        setThrottle(0);
     }
     public void beaconSet(){
         colorAcache = colorAreader.read(0x04, 1);
@@ -287,17 +307,51 @@ public class SmallBot extends OpMode{
         right.setPower(throttle);
 
     }
-    public void wallFollow(){
-        double trim = 12-range1Cache[0];
-        if(trim>0){
-            trim*=trim;
-        }else{
-            trim*=-trim;
+    public void wallFollow(double d){
+        if(d-range1Cache[0] >= 2){
+            left.setPower(0.1);
+            right.setPower(0);
+            direction = true;
+            adjust = true;
+            ranges.clear();
+            index = 0;
         }
-        right.setPower(0.5-(0.01*(trim)));
-        left.setPower(0.5+(0.01*(trim)));
+        if(d-range1Cache[0] <= -2){
+            left.setPower(0);
+            right.setPower(0.1);
+            direction = false;
+            adjust = true;
+            ranges.clear();
+            index = 0;
+        }
+    }
 
-        if(right.getPower()<0)right.setPower(0);
-        if(left.getPower()<0)left.setPower(0);
+    public void adjust(){
+        ranges.add(range1Cache[0]);
+
+        if (ranges.size() == 1)
+            return;
+        index++;
+        if(Math.abs(range1Cache[0] - ranges.get(index-1))>100 || range1Cache[0] < 5){
+            index--;
+            ranges.remove(ranges.size()-1);
+            DbgLog.msg("Removed Bad Data " + range1Cache);
+            return;
+        }
+        DbgLog.msg("Wall" + range1Cache[0] +"," + (ranges.get(index) - ranges.get(index - 1)));
+        if(direction){
+            if (ranges.get(index) - ranges.get(index - 1) >= 1) {
+                setThrottle(0.3);
+                adjust = false;
+                ranges.clear();
+            }
+        }else{
+            if (ranges.get(index) - ranges.get(index - 1) <= -1) {
+                setThrottle(0.3);
+                adjust = false;
+                ranges.clear();
+            }
+        }
+
     }
 }
