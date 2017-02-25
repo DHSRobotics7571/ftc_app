@@ -71,6 +71,7 @@ public class autoRed extends OpMode{
     boolean done = false;
     boolean adjust = false;
     boolean direction = false;
+    boolean found = false;
 
     @Override
     public void init() {
@@ -107,6 +108,8 @@ public class autoRed extends OpMode{
     public void start(){
         colorAreader.write8(3, 1);
         colorCreader.write8(3, 1);
+
+        time = System.currentTimeMillis();
     }
     double color = 0;
     double color2 = 0;
@@ -125,22 +128,44 @@ public class autoRed extends OpMode{
             case 0:
 
 
-                setThrottle(0.5);
+
+                if(count==1){
+                    if(System.currentTimeMillis() - time >= 2000){
+
+                        if(range1Cache[0]<=30){
+                            motorLeftBack.setPower(0.15);
+                            motorLeftFront.setPower(0.15);
+                            motorRightBack.setPower(0);
+                            motorRightFront.setPower(0);
+                            robo = 8;
+                        }else setThrottle(0.15);
+
+                    }else setThrottle(0.3);
+                    break;
+                }
+                setThrottle(0.3);
                 initRange = 0;
                 robo++;
                 break;
             case 1:
-                if(count==2 || count==4){
+                if(count!=3){
                     if (initRange == 0) initRange = range1Cache[0];
                     if (initRange>23) initRange = 23;
-                    if (initRange<10) initRange = 15;
+                    if (initRange<20) initRange = 20;
 
                     if (!adjust) wallFollow(initRange);
                     if (adjust) adjust();
                 }
-                if(ODSright.getRawLightDetected() > 1.21){
-                    setThrottle(-0.1);
-                    robo++;
+                if(ODSright.getRawLightDetected() > 1.21||found){
+                    if(found){
+                        setThrottle(-0.1);
+                        found = false;
+                        robo++;
+                    }else{
+                        setThrottle(1);
+                        found = true;
+                    }
+
                 }
 
                 break;
@@ -174,7 +199,7 @@ public class autoRed extends OpMode{
                     break;
                 }
                 servo.setPower(-1);
-                if(color>=10 && color2>=10){
+                if(color>=9 && color2>=9){
                     servo.setPower(1);
                     robo++;
                 }
@@ -252,10 +277,13 @@ public class autoRed extends OpMode{
                 if (ranges.size() == 1)
                     break;
                 index++;
-                if(Math.abs(range1Cache[0] - ranges.get(index-1))>100 || range1Cache[0] < 10){
+                if(Math.abs(range1Cache[0] - ranges.get(index - 1))>100 || range1Cache[0] < 10){
                     index--;
-                    ranges.remove(ranges.size()-1);
+                    ranges.remove(ranges.size() - 1);
                     DbgLog.msg("Removed Bad Data " + range1Cache);
+                    if(count == 1){
+                        robo = 1;
+                    }
                     break;
                 }
                 DbgLog.msg("Case 10:" + range1Cache[0] +"," + (ranges.get(index) - ranges.get(index - 1)));
@@ -263,9 +291,15 @@ public class autoRed extends OpMode{
                     setThrottle(0);
                     temp.addAll(ranges);
                     robo=0;
+                    if(count == 1){
+                        setThrottle(0.3);
+                        robo = 1;
+                        break;
+                    }
 
 
                 }
+
                 break;
 
 
@@ -280,6 +314,7 @@ public class autoRed extends OpMode{
 //        telemetry.addData("Green", color.green());
         telemetry.addData("case", robo);
         telemetry.addData("count", count);
+        telemetry.addData("initRange ", initRange);
     }
     @Override
     public void stop(){
@@ -296,9 +331,9 @@ public class autoRed extends OpMode{
         color = colorAcache[0] & 0xFF;
         color2 = colorCcache[0] & 0xFF;
 
-        if(color2 >= 10){
+        if(color2 >= 9){
             servo2.setPower(1);
-        } else if(color>= 10){
+        } else if(color>= 9){
             servo2.setPower(-1);
         } else{
             servo2.setPower(0);
@@ -316,6 +351,7 @@ public class autoRed extends OpMode{
         motorLeftFront.setPower(throttle);
 
     }
+
     public void wallFollow(double d){
         if(d-range1Cache[0] >= 2){
             motorRightBack.setPower(0);
@@ -327,7 +363,7 @@ public class autoRed extends OpMode{
             ranges.clear();
             index = 0;
         }
-        if(d-range1Cache[0] <= -2){
+        if(count!=1 && d-range1Cache[0] <= -2){
             motorRightBack.setPower(0.1);
             motorRightFront.setPower(0.1);
             motorLeftBack.setPower(0);
@@ -341,30 +377,23 @@ public class autoRed extends OpMode{
 
     public void adjust(){
         ranges.add(range1Cache[0]);
-
         if (ranges.size() == 1)
             return;
         index++;
-        if(Math.abs(range1Cache[0] - ranges.get(index-1))>100 || range1Cache[0] < 5){
+        if((count!=1) && (Math.abs(range1Cache[0] - ranges.get(index-1))>100 || range1Cache[0] < 5)){
             index--;
             ranges.remove(ranges.size()-1);
             DbgLog.msg("Removed Bad Data " + range1Cache);
             return;
         }
         DbgLog.msg("Wall" + range1Cache[0] +"," + (ranges.get(index) - ranges.get(index - 1)));
-        if(direction){
-            if (ranges.get(index) - ranges.get(index - 1) >= 1) {
-                setThrottle(0.3);
-                adjust = false;
-                ranges.clear();
-            }
-        }else{
-            if (ranges.get(index) - ranges.get(index - 1) <= -1) {
-                setThrottle(0.3);
-                adjust = false;
-                ranges.clear();
-            }
+        if (ranges.get(index) > ranges.get(index - 1) ) {
+            setThrottle(0.3);
+            adjust = false;
+            direction = !direction;
+            done = true;
+            ranges.clear();
+            return;
         }
-
     }
 }
