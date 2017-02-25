@@ -123,7 +123,7 @@ public class SmallBot extends OpMode{
             case 0:
 
 
-                setThrottle(0.5);
+                setThrottle(0.3);
                 initRange = 0;
                 robo++;
                 break;
@@ -131,7 +131,7 @@ public class SmallBot extends OpMode{
                 if(count==2 || count==4){
                     if (initRange == 0) initRange = range1Cache[0];
                     if (initRange>23) initRange = 23;
-                    if (initRange<10) initRange = 15;
+                    if (initRange<20) initRange = 20;
 
                     if (!adjust) wallFollow(initRange);
                     if (adjust) adjust();
@@ -209,7 +209,6 @@ public class SmallBot extends OpMode{
                 }
                 break;
             case 8:
-                //
                 right.setPower(0);
                 left.setPower(0.30);
                 robo++;

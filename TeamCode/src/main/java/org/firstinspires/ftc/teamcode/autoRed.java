@@ -23,7 +23,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.ArrayList;
 
-@TeleOp(name = "BigBotRed" , group = "Autonomous")
+@TeleOp(name = "BigBoyRed" , group = "Autonomous")
 public class autoRed extends OpMode{
     //varibles
     int robo = 0;
@@ -79,8 +79,8 @@ public class autoRed extends OpMode{
         motorRightBack = hardwareMap.dcMotor.get("rightback");
         motorLeftFront = hardwareMap.dcMotor.get("leftfront");
         motorLeftBack = hardwareMap.dcMotor.get("leftback");
-        motorLeftFront.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorLeftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorRightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorRightBack.setDirection(DcMotorSimple.Direction.REVERSE);
         ODSright = hardwareMap.opticalDistanceSensor.get("odsright");
         ODSleft = hardwareMap.opticalDistanceSensor.get("odsleft");
         //color = hardwareMap.colorSensor.get("color");
@@ -199,7 +199,7 @@ public class autoRed extends OpMode{
                 }
                 break;
             case 7:
-                if(System.currentTimeMillis() - time >= 1000){
+                if(System.currentTimeMillis() - time >= 850){
                     if(count == 1 || count == 3){
                         robo = 0;
                         count++;
