@@ -27,6 +27,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 @TeleOp(name = "Color Sensor", group = "Autonomous")
+@Disabled
 // @Autonomous(...) is the other common choice
 public class ColorSensor extends OpMode {
 

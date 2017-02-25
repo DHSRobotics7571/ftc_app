@@ -5,11 +5,13 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name="HardwareTest", group="Autonomous")
+@Disabled
 public class hardwareTest extends OpMode implements SensorEventListener {
     //instantiate objects
     private DcMotor motorRightFront,motorRightBack,motorLeftFront,motorLeftBack;

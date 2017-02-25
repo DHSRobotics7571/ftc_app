@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 /**
  * Created by Andre on 12/18/2016.
  */
 @TeleOp(name="ArcadeDriveTrainTest", group="Manual")
+@Disabled
 public class arcadeDrivetraintest extends drivetraintest {
 
     @Override
