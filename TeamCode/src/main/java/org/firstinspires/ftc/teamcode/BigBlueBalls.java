@@ -23,7 +23,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.ArrayList;
 
-@TeleOp(name = "BigBoyBlue - 120points" , group = "Autonomous")
+@TeleOp(name = "BigBoyBlue - 90points" , group = "Autonomous")
 public class BigBlueBalls extends OpMode{
     //varibles
     int robo = -2;
@@ -71,6 +71,10 @@ public class BigBlueBalls extends OpMode{
     boolean done = false;
     boolean adjust = false;
     boolean direction = false;
+
+
+    Servo linear1;
+    Servo linear2;
 
     @Override
     public void init() {

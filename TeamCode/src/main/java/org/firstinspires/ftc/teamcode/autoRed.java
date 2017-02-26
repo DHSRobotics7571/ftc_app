@@ -40,6 +40,10 @@ public class autoRed extends OpMode{
     // ColorSensor color;
     CRServo servo;
     CRServo servo2;
+
+    Servo linear;
+    Servo linear2;
+
     byte[] range1Cache; //The read will return an array of bytes. They are stored in this variable
 
     I2cAddr RANGE1ADDRESS = new I2cAddr(0x14); //Default I2C address for MR Range (7-bit)
@@ -91,6 +95,10 @@ public class autoRed extends OpMode{
 
         servo2 = hardwareMap.crservo.get("servo2");
 
+        linear = hardwareMap.servo.get("servolinear");
+        linear2 = hardwareMap.servo.get("servolinear2");
+
+
         colorA = hardwareMap.i2cDevice.get("cc");
         colorC = hardwareMap.i2cDevice.get("ca");
 
@@ -102,6 +110,9 @@ public class autoRed extends OpMode{
 
         Spongebob = hardwareMap.touchSensor.get("t");
         colorCreader.write8(3, 1);
+
+        linear2.setPosition(.5);
+        linear.setPosition(1);
 
     }
     public void start(){
@@ -125,7 +136,7 @@ public class autoRed extends OpMode{
             case 0:
 
 
-                setThrottle(0.5);
+                setThrottle(0.2);
                 initRange = 0;
                 robo++;
                 break;
@@ -139,26 +150,26 @@ public class autoRed extends OpMode{
                     if (adjust) adjust();
                 }
                 if(ODSright.getRawLightDetected() > 1.21){
-                    setThrottle(-0.1);
-                    robo++;
+                    setThrottle(0);
+                    robo=2;
                 }
 
                 break;
             case 2:
-                if(ODSleft.getRawLightDetected() > 1.51 && ODSright.getRawLightDetected() > 1.51){
-                    servo.setPower(-0.3);
+                if(ODSleft.getRawLightDetected() > 1.21 && ODSright.getRawLightDetected() > 1.21){
+                    servo.setPower(0.3);
                     setThrottle(0);
                     robo++;
                     break;
                 }
-                if (ODSright.getRawLightDetected() > 1.51) {
-                    leftTrim = -0.1;
-                    rightTrim = 0.1;
-                }else if(ODSleft.getRawLightDetected() > 1.51){
-                    leftTrim = 0.1;
-                    rightTrim = -0.1;
+                if (ODSright.getRawLightDetected() > 1.21) {
+                    leftTrim = -0.2;
+                    rightTrim = 0.2;
+                }else if(ODSleft.getRawLightDetected() > 1.21){
+                    leftTrim = 0.2;
+                    rightTrim = -0.2;
                 }else{
-                    rightTrim = 0.1; leftTrim= 0.1;
+                    rightTrim = 0.2; leftTrim= 0.2;
                 }
                 motorRightBack.setPower(-rightTrim);
                 motorRightFront.setPower(-rightTrim);
@@ -167,15 +178,15 @@ public class autoRed extends OpMode{
 
                 break;
             case 3:
-                if(ODSleft.getRawLightDetected() < 1.51 || ODSright.getRawLightDetected() < 1.51){
+                if(ODSleft.getRawLightDetected() < 1.21 || ODSright.getRawLightDetected() < 1.21){
                     servo.setPower(0);
-                    setThrottle(-0.1);
+                    setThrottle(-0.2);
                     robo--;
                     break;
                 }
-                servo.setPower(-1);
+                servo.setPower(1);
                 if(color>=10 && color2>=10){
-                    servo.setPower(1);
+                    servo.setPower(-1);
                     robo++;
                 }
                 break;
@@ -237,8 +248,8 @@ public class autoRed extends OpMode{
                 DbgLog.msg("Case 9:" + range1Cache[0] +"," + (ranges.get(index) - ranges.get(index - 1)));
                 if (ranges.get(index) - ranges.get(index - 1) <= -2) {
                     robo++;
-                    motorLeftBack.setPower(0.15);
-                    motorLeftFront.setPower(0.15);
+                    motorLeftBack.setPower(0.2);
+                    motorLeftFront.setPower(0.2);
                     temp.addAll(ranges);
                     temp.add(null);
                     ranges.clear();
@@ -280,6 +291,8 @@ public class autoRed extends OpMode{
 //        telemetry.addData("Green", color.green());
         telemetry.addData("case", robo);
         telemetry.addData("count", count);
+        telemetry.addData("ODSRight", ODSright.getRawLightDetected());
+        telemetry.addData("ODSLeft", ODSleft.getRawLightDetected());
     }
     @Override
     public void stop(){

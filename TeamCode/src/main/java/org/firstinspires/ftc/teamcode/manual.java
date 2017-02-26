@@ -6,6 +6,10 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.I2cAddr;
+import com.qualcomm.robotcore.hardware.I2cDevice;
+import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
+import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -17,13 +21,23 @@ public class manual extends OpMode {
     DcMotor motorFeeder;
     DcMotor motorCatapult;
 
-    CRServo servoBeacon;
+    CRServo servo;
+    CRServo servo2;
     Servo servoFeeder;
     Servo servoLinear;
     Servo servoLinear2;
     double throttlecontrol = 1;
     OpticalDistanceSensor ODSright, ODSleft;
-    ColorSensor color;
+    double color = 0;
+    double color2 = 0;
+
+    byte[] colorAcache;
+    byte[] colorCcache;
+
+    I2cDevice colorA;
+    I2cDevice colorC;
+    I2cDeviceSynch colorAreader;
+    I2cDeviceSynch colorCreader;
 
 
     //logic objects
@@ -44,7 +58,8 @@ public class manual extends OpMode {
 
         motorCatapult = hardwareMap.dcMotor.get("catapult");
 
-        servoBeacon = hardwareMap.crservo.get("beacon");
+        servo = hardwareMap.crservo.get("servo");
+        servo2 = hardwareMap.crservo.get("servo2");
         servoFeeder = hardwareMap.servo.get("servofeeder");
         servoLinear = hardwareMap.servo.get("servolinear");
         servoLinear2 = hardwareMap.servo.get("servolinear2");
@@ -53,14 +68,29 @@ public class manual extends OpMode {
         ODSleft = hardwareMap.opticalDistanceSensor.get("odsleft");
 
 
-        color = hardwareMap.colorSensor.get("color");
+        //color = hardwareMap.colorSensor.get("color");
 
         servoLinear.setPosition(1);
         servoLinear2.setPosition(.5);
-    }
+        colorA = hardwareMap.i2cDevice.get("cc");
+        colorC = hardwareMap.i2cDevice.get("ca");
 
+        colorAreader = new I2cDeviceSynchImpl(colorA, I2cAddr.create8bit(0x42), false);
+        colorCreader = new I2cDeviceSynchImpl(colorC, I2cAddr.create8bit(0x70), false);
+
+        colorAreader.engage();
+        colorCreader.engage();
+    }
+    public void start(){
+        colorAreader.write8(3, 1);
+        colorCreader.write8(3, 1);
+    }
     @Override
     public void loop(){
+
+        colorCcache = colorCreader.read(0x04, 1);
+
+        beaconSet();
         /*
         Gamepad1's keymap                       Gamepad2's keymap
         DPAD                                    DPAD
@@ -131,7 +161,7 @@ public class manual extends OpMode {
         if(gamepad1.right_bumper){
             power = 1;
         }else if(gamepad1.left_bumper) power = -1;
-        servoBeacon.setPower(power);
+        servo.setPower(power);
     }
 
     @Override
@@ -166,6 +196,26 @@ public class manual extends OpMode {
         }
 
         return a;
+    }
+    public void beaconSet(){
+        colorAcache = colorAreader.read(0x04, 1);
+        colorCcache = colorCreader.read(0x04, 1);
+
+        color = colorAcache[0] & 0xFF;
+        color2 = colorCcache[0] & 0xFF;
+
+        if(color2 >= 10){
+            servo2.setPower(1);
+        } else if(color>= 10){
+            servo2.setPower(-1);
+        } else{
+            servo2.setPower(0);
+        }
+
+        if(color>=2 && color<=5 && color2>=2 && color2<=5){
+            servo2.setPower(1);
+        }
+        telemetry.addData("input", color + ","+ color2);
     }
 
 }
