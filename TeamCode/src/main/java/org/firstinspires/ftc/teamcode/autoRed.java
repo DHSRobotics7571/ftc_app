@@ -179,7 +179,7 @@ public class autoRed extends OpMode{
                 break;
             case 3:
                 if(ODSleft.getRawLightDetected() < 1.21 || ODSright.getRawLightDetected() < 1.21){
-                    servo.setPower(0);
+                    servo.setPower(0);//
                     setThrottle(-0.2);
                     robo--;
                     break;
