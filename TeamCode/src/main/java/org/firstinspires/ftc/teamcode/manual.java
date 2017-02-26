@@ -168,7 +168,7 @@ public class manual extends OpMode {
     public void stop(){
 
     }
-    //you dont need to know what this does.
+    //you dont need to know what this does
     public float[] map(float[] a, double minR, double maxR){
         float min=Float.MAX_VALUE;
         float max=Float.MIN_VALUE;
