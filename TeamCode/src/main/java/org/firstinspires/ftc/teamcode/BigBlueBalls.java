@@ -26,7 +26,7 @@ import java.util.ArrayList;
 @TeleOp(name = "BigBoyBlue - 90points" , group = "Autonomous")
 public class BigBlueBalls extends OpMode{
     //varibles
-    int robo = -2;
+    int robo = 0;
     long time;
     int index = 0;
 
@@ -36,6 +36,7 @@ public class BigBlueBalls extends OpMode{
 
     //motors
     DcMotor motorRightFront, motorRightBack, motorLeftFront, motorLeftBack;
+    DcMotor motorCatapult;
 
     // ColorSensor color;
     CRServo servo;
@@ -126,153 +127,24 @@ public class BigBlueBalls extends OpMode{
         double rightTrim = 0, leftTrim = 0;
         beaconSet();
         switch (robo) {
-            case -2:
-
             case 0:
 
-
-                setThrottle(0.5);
-                initRange = 0;
+                time = System.currentTimeMillis();
+                motorCatapult.setPower(1);
                 robo++;
                 break;
-            case 1:
-                if(count==2 || count==4){
-                    if (initRange == 0) initRange = range1Cache[0];
-                    if (initRange>23) initRange = 23;
-                    if (initRange<10) initRange = 15;
 
-                    if (!adjust) wallFollow(initRange);
-                    if (adjust) adjust();
-                }
-                if(ODSright.getRawLightDetected() > 1.21){
-                    setThrottle(-0.1);
+            case 1:
+
+                if (System.currentTimeMillis() - 1000 >= time){
+                    motorCatapult.setPower(0);
+                    time = System.currentTimeMillis();
                     robo++;
                 }
-
                 break;
             case 2:
-                if(ODSleft.getRawLightDetected() > 1.51 && ODSright.getRawLightDetected() > 1.51){
-                    servo.setPower(-0.3);
-                    setThrottle(0);
-                    robo++;
-                    break;
-                }
-                if (ODSright.getRawLightDetected() > 1.51) {
-                    leftTrim = 0.1;
-                    rightTrim = -0.1;
-                }else if(ODSleft.getRawLightDetected() > 1.51){
-                    leftTrim = -0.1;
-                    rightTrim = 0.1;
-                }else{
-                    rightTrim = 0.1; leftTrim= 0.1;
-                }
-                motorRightBack.setPower(-rightTrim);
-                motorRightFront.setPower(-rightTrim);
-                motorLeftBack.setPower(-leftTrim);
-                motorLeftFront.setPower(-leftTrim);
-
-                break;
-            case 3:
-                if(ODSleft.getRawLightDetected() < 1.51 || ODSright.getRawLightDetected() < 1.51){
-                    servo.setPower(0);
-                    setThrottle(-0.1);
-                    robo--;
-                    break;
-                }
-                servo.setPower(-1);
-                if((color >=1 && color <= 3) && (color2 >= 1 && color2 <=3 )){
-                    servo.setPower(1);
-                    robo++;
-                }
-                break;
-            case 4:
-                robo++;
-                break;
-            case 5:
-                robo++;
-                break;
-            case 6:
-                if(Spongebob.isPressed()){
-                    servo.setPower(0);
-                    robo++;
-                    if(count==4){
-                        robo = -1;
-                        setThrottle(0);
-                        break;
-                    }
-                    setThrottle(0.3);
-                    time = System.currentTimeMillis();
-                }
-                break;
-            case 7:
-                if(System.currentTimeMillis() - time >= 850){
-                    if(count == 1 || count == 3){
-                        robo = 0;
-                        count++;
-                    } else if(count == 2){
-                        robo++;
-                        count++;
-                    } else{
-                        robo = -1;
-                        setThrottle(0);
-                    }
-                }
-                break;
-            case 8:
-                //
-                motorRightBack.setPower(0.3);
-                motorRightFront.setPower(0.3);
-                motorLeftBack.setPower(0);
-                motorLeftFront.setPower(0);
-                robo++;
-                ranges.clear();
-                index = 0;
-                break;
-            case 9:
-                ranges.add(range1Cache[0]);
-
-                if (ranges.size() == 1)
-                    break;
-                index++;
-                if(Math.abs(range1Cache[0] - ranges.get(index-1))>100 || range1Cache[0] < 10){
-                    index--;
-                    ranges.remove(ranges.size()-1);
-                    DbgLog.msg("Removed Bad Data " + range1Cache);
-                    break;
-                }
-                DbgLog.msg("Case 9:" + range1Cache[0] +"," + (ranges.get(index) - ranges.get(index - 1)));
-                if (ranges.get(index) - ranges.get(index - 1) <= -2) {
-                    robo++;
-                    motorLeftBack.setPower(0.15);
-                    motorLeftFront.setPower(0.15);
-                    temp.addAll(ranges);
-                    temp.add(null);
-                    ranges.clear();
-                    index = 0;
-
-                }
-                break;
-            case 10:
-                ranges.add(range1Cache[0]);
-
-                if (ranges.size() == 1)
-                    break;
-                index++;
-                if(Math.abs(range1Cache[0] - ranges.get(index-1))>100 || range1Cache[0] < 10){
-                    index--;
-                    ranges.remove(ranges.size()-1);
-                    DbgLog.msg("Removed Bad Data " + range1Cache);
-                    break;
-                }
-                DbgLog.msg("Case 10:" + range1Cache[0] +"," + (ranges.get(index) - ranges.get(index - 1)));
-                if (ranges.get(index) - ranges.get(index - 1) >= 1) {
-                    setThrottle(0);
-                    temp.addAll(ranges);
-                    robo=0;
 
 
-                }
-                break;
 
 
         }
